@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Balance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --dark: #0f172a; --card: #1e293b; --text: #f8fafc; }
+        body { background: var(--dark); color: var(--text); font-family: 'Outfit', sans-serif; padding: 40px; }
+        .container { max-width: 800px; margin: auto; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .btn-back { background: var(--card); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; border: 1px solid rgba(255,255,255,0.1); }
+        .search-box { width: 100%; padding: 15px; background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-size: 16px; margin-bottom: 20px; outline: none; }
+        
+        .user-list { display: grid; gap: 15px; }
+        .user-card { background: var(--card); padding: 20px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.05); }
+        .info h4 { margin: 0 0 5px 0; font-size: 16px; }
+        .info p { margin: 0; color: #94a3b8; font-size: 13px; font-family: monospace; }
+        .balance-tag { color: #10b981; font-weight: 700; margin-top: 5px; display: block; }
+        
+        .actions { display: flex; gap: 10px; align-items: center; }
+        .amt-input { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px; border-radius: 6px; width: 100px; outline: none; }
+        .btn { border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; color: white; transition: 0.2s; }
+        .btn-add { background: #10b981; } .btn-add:hover { opacity: 0.9; }
+        .btn-cut { background: #ef4444; } .btn-cut:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Manage Balance</h2>
+            <a href="home_admin.html" class="btn-back"><i class="fas fa-arrow-left"></i> Home</a>
+        </div>
+        <input type="text" id="search" class="search-box" placeholder="Search user to modify balance..." onkeyup="filterUsers()">
+        <div id="user-list" class="user-list">Loading users...</div>
+    </div>
+
+    <!-- Firebase Config & Logic (Same logic, updated UI) -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyA-6c8nN8TUj9V8km-NAVkjgoIeQ5m7_ms", authDomain: "art-732d1.firebaseapp.com", databaseURL: "https://art-732d1-default-rtdb.firebaseio.com", projectId: "art-732d1", storageBucket: "art-732d1.appspot.com", messagingSenderId: "901862985233", appId: "1:901862985233:web:ddfd6b7c8a57c65ef0ebb0" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        let allUsers = [];
+
+        db.ref('users').on('value', snapshot => {
+            allUsers = [];
+            snapshot.forEach(child => allUsers.push(child.val()));
+            renderList(allUsers);
+        });
+
+        function renderList(users) {
+            const container = document.getElementById('user-list');
+            container.innerHTML = "";
+            users.forEach(u => {
+                container.innerHTML += `
+                    <div class="user-card">
+                        <div class="info">
+                            <h4>${u.phone || 'No Phone'}</h4>
+                            <p>UID: ${u.uid}</p>
+                            <span class="balance-tag">Current: ${u.balance || 0} TC</span>
+                        </div>
+                        <div class="actions">
+                            <input type="number" id="amt-${u.uid}" class="amt-input" placeholder="Amount">
+                            <button class="btn btn-add" onclick="updateBal('${u.uid}', 'add')"><i class="fas fa-plus"></i></button>
+                            <button class="btn btn-cut" onclick="updateBal('${u.uid}', 'cut')"><i class="fas fa-minus"></i></button>
+                        </div>
+                    </div>`;
+            });
+        }
+        function filterUsers() {
+            const val = document.getElementById('search').value.toLowerCase();
+            const filtered = allUsers.filter(u => (u.phone && u.phone.includes(val)) || (u.uid && u.uid.toLowerCase().includes(val)));
+            renderList(filtered);
+        }
+        function updateBal(uid, type) {
+            const input = document.getElementById(`amt-${uid}`);
+            const amount = parseFloat(input.value);
+            if(!amount) return alert("Enter amount");
+            db.ref('users/' + uid).once('value', snap => {
+                let current = snap.val().balance || 0;
+                let newBal = type === 'add' ? (current + amount) : (current - amount);
+                db.ref('users/' + uid).update({ balance: newBal }).then(() => { alert("Updated!"); input.value = ""; });
+            });
+        }
+    </script>
+</body>
+</html>
