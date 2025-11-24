@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Initializing...</title>
+    <style>
+        body { background: #0f172a; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; font-family: sans-serif; margin: 0; }
+        .logo { font-size: 50px; color: #6366f1; margin-bottom: 20px; animation: spin 3s infinite linear; }
+        .bar-container { width: 250px; height: 4px; background: #1e293b; border-radius: 4px; overflow: hidden; position: relative; }
+        .bar { width: 50%; height: 100%; background: #6366f1; position: absolute; animation: load 2s infinite ease-in-out; box-shadow: 0 0 10px #6366f1; }
+        h3 { font-weight: 400; letter-spacing: 2px; font-size: 14px; opacity: 0.7; margin-top: 20px; }
+        @keyframes load { 0% { left: -50%; } 100% { left: 100%; } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="logo"><i class="fas fa-circle-notch"></i></div> <!-- FontAwesome needed or just css shape -->
+    <div class="bar-container"><div class="bar"></div></div>
+    <h3>INITIALIZING SYSTEM</h3>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        setTimeout(() => { window.location.href = "home_admin.html"; }, 3000);
+    </script>
+</body>
+</html>
